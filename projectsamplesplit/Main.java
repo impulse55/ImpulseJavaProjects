@@ -30,34 +30,39 @@ import javafx.scene.image.*;
 import java.net.*;
 import javafx.geometry.*;
 
-
 public class Main extends Application
 {
    FlowPane fp;
-   
+   Player thePlayer = new Player(300f,300f);
    Canvas theCanvas = new Canvas(600,600);
+   Font font = Font.font("Verdana", FontWeight.EXTRA_BOLD, 12);
+   String score = "";
+   String highScore = "";
 
    public void start(Stage stage)
    {
-      
-   
       fp = new FlowPane();
+      
       fp.getChildren().add(theCanvas);
       gc = theCanvas.getGraphicsContext2D();
       drawBackground(300,300,gc);
-      
+      thePlayer.draw(300,300,gc,true);
       
       Scene scene = new Scene(fp, 600, 600);
       stage.setScene(scene);
       stage.setTitle("Project :)");
       stage.show();
       
+      fp.setOnKeyPressed(new KeyListenerDown());
+      fp.setOnKeyReleased(new KeyListenerUp());
       
+      AnimationHandler ta = new AnimationHandler();
+      ta.start();
+      
+      fp.requestFocus();
    }
    
    GraphicsContext gc;
-   
-   
    
    Image background = new Image("stars.png");
    Image overlay = new Image("starsoverlay.png");
@@ -104,28 +109,94 @@ public class Main extends Application
       }
    }
    
+   float x=300,y=300;
+   float forceX = 0;
+   float forceY = 0;
+   boolean up,down,left,right;
+   public class KeyListenerDown implements EventHandler<KeyEvent>  
+   {
+      public void handle(KeyEvent event) 
+      {
+         if (event.getCode() == KeyCode.A) 
+         {
+            left = true;
+         }
+         if (event.getCode() == KeyCode.W)  
+         {
+            up = true;
+         }
+         if (event.getCode() == KeyCode.S)  
+         {
+            down = true;
+         }
+         if (event.getCode() == KeyCode.D)  
+         {
+            right = true;
+         }
+      }
+   }
    
-   
-   
-   
-
+   public class KeyListenerUp implements EventHandler<KeyEvent>  
+   {
+      public void handle(KeyEvent event) 
+      {
+         if (event.getCode() == KeyCode.A) 
+         {
+            left = false;
+         }
+         if (event.getCode() == KeyCode.W)  
+         {
+            up = false;
+         }
+         if (event.getCode() == KeyCode.S)  
+         {
+            down = false;
+         }
+         if (event.getCode() == KeyCode.D)  
+         {
+            right = false;
+         }
+      }
+   }
    
    public class AnimationHandler extends AnimationTimer
    {
       public void handle(long currentTimeInNanoSeconds) 
       {
+         if(up && forceY < 5)
+            forceY-=0.1;
+         if(down && forceY > -5)
+            forceY+=0.1;
+         if(left && forceX < 5)
+            forceX-=0.1;
+         if(right && forceX > -5)
+            forceX+=0.1;
+            
+         if(!up && forceY < -0.25)
+            forceY+=0.025;
+         if(!down && forceY > 0.25)
+            forceY-=0.025;
+         if(!left && forceX < -0.25)
+            forceX+=0.025;
+         if(!right && forceX > 0.25)
+            forceX-=0.025;
+            
+         if(!up && !down && !left && !right && (forceX > -0.25 && forceX < 0.25))
+            forceX=0;
+         if(!up && !down && !left && !right && (forceY > -0.25 && forceY < 0.25))
+            forceY=0;
+         
+         x+=1*forceX;
+         y+=1*forceY;
          gc.clearRect(0,0,600,600);
-         
-         //USE THIS CALL ONCE YOU HAVE A PLAYER
-         //drawBackground(thePlayer.getX(),thePlayer.getY(),gc); 
-
-
-	      //example calls of draw - this should be the player's call for draw
-         //thePlayer.draw(300,300,gc,true); //all other objects will use false in the parameter.
-
-         //example call of a draw where m is a non-player object. Note that you are passing the player's position in and not m's position.
-         //m.draw(thePlayer.getX(),thePlayer.getY(),gc,false);
-         
+         thePlayer.setX(x);
+         thePlayer.setY(y);
+         drawBackground(thePlayer.getX(),thePlayer.getY(),gc);
+         score = "Score is: "+((long)Math.sqrt((300-thePlayer.getX())*(300-thePlayer.getX())+(300-thePlayer.getY())*(300-thePlayer.getY())))/100;
+         gc.setFont(font);
+         gc.fillText(score, 15, 30);
+         gc.fillText("High Score is: 0", 15, 55);
+         thePlayer.draw(300,300,gc,true);
       }
    }
 
