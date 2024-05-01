@@ -73,7 +73,7 @@ public class Main extends Application
       //Creates the scene and stage
       Scene scene = new Scene(fp, 600, 600);
       stage.setScene(scene);
-      stage.setTitle("Trent's Awesome Project :)");
+      stage.setTitle("My Awesome Project :)");
       stage.show();
       
       //Binds the KeyListenerDown and KeyListenerUp classes to the FlowPane
